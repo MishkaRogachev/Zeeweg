@@ -124,19 +124,23 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
     case PanelMode.ObserveMarkers:
     default:
       return (
-        <div className="flex flex-col h-full space-y-4">
-          <h2 className="text-lg font-semibold">Markers</h2>
+        <div className="flex flex-col space-y-4  ">
+          <div>
+            <h2 className="text-lg font-semibold">Markers</h2>
 
-          <button
-            className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700 transition"
-            onClick={enterCreateMode}
-          >
-            Add New
-          </button>
+            <button
+              className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700 transition"
+              onClick={enterCreateMode}
+            >
+              Add New
+            </button>
 
-          <h2 className="text-lg font-semibold">Created markers</h2>
+            <h2 className="text-lg font-semibold">Created markers</h2>            
+          </div>
 
-          <div className="overflow-y-auto flex-1 space-y-2 pr-1 bg-black/20">
+        
+          {/* Updated container to apply scroll only to the markers list */}
+          <div className="flex-1 space-y-2 pr-1 bg-black/20 rounded max-h-[70vh] overflow-y-auto">
             {createdMarkers.map((marker, i) => {
               const [iconUrl] = markerIconAndColorByType(marker.description.markerType)
 
