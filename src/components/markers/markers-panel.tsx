@@ -1,10 +1,9 @@
-'use client'
 
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { AnchorProvider } from '@coral-xyz/anchor'
 
-import MarkerEditor from './marker-editor'
+import MarkerEditor, { markerTypeNames } from './marker-editor' // Import markerTypeNames
 import type { MapViewApi } from '../map/map-view'
 import { upsertMarker as saveMarker, getMarkersByAuthor, Marker, deleteMarker } from '@/lib/markers'
 import { markerIconAndColorByType } from '@/components/map/map-markers'
@@ -122,65 +121,92 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
       )
 
     case PanelMode.ObserveMarkers:
-    default:
-      return (
-        <div className="flex flex-col space-y-4  ">
-          <div>
-            <h2 className="text-lg font-semibold">Markers</h2>
-
-            <button
-              className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700 transition"
-              onClick={enterCreateMode}
-            >
-              Add New
-            </button>
-
-            <h2 className="text-lg font-semibold">Created markers</h2>            
-          </div>
-
+      default:
+        const [filterType, setFilterType] = useState<string | null>(null)
+      
+        const filteredMarkers = filterType
+        ? createdMarkers.filter((marker) => {
+            const markerTypeKey = Object.keys(marker.description.markerType)[0]; // Extract the key from markerType
+            return markerTypeKey === filterType;
+          })
+        : createdMarkers;
+      
+        return (
+          <div className="flex flex-col space-y-4 h-full">
+            <div>
+              <h2 className="text-lg font-semibold">Markers</h2>
+              {filterType}
+              <button
+                className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700 transition"
+                onClick={enterCreateMode}
+              >
+                Add New
+              </button>
         
-          {/* Updated container to apply scroll only to the markers list */}
-          <div className="flex-1 space-y-2 pr-1 bg-black/20 rounded max-h-[70vh] overflow-y-auto">
-            {createdMarkers.map((marker, i) => {
-              const [iconUrl] = markerIconAndColorByType(marker.description.markerType)
-
-              return (
-                <div
-                  key={i}
-                  className="group flex items-center space-x-3 p-2 rounded bg-black/10 text-white hover:bg-black/20 transition"
-                >
-                  <button
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
-                    onClick={() => {
-                      mapApiRef.current?.translateToCenter(
-                        marker.position.lon / 1e6,
-                        marker.position.lat / 1e6
-                      )
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={iconUrl} alt="icon" className="w-4 h-4" />
-                  </button>
-
-                  <span className="flex-1 text-sm truncate">
-                    {marker.description.name || '(Unnamed)'}
-                  </span>
-
-                  <button
-                    className="text-xs px-2 py-1 bg-white/10 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
-                    onClick={() => {
-                      setIsNewMarker(false)
-                      setInitialMarker(marker)
-                      setMode(PanelMode.EditingMarker)
-                    }}
-                  >
-                    Edit
-                  </button>
+              <h2 className="text-lg font-semibold">Filter by Type</h2>
+              <select
+                className="w-full px-2 py-1 rounded bg-white text-black"
+                value={filterType || ''}
+                onChange={(e) => setFilterType(e.target.value || null)}
+              >
+                <option value="">All</option>
+                {markerTypeNames.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </select>
+        
+              <h2 className="text-lg font-semibold">Created markers</h2>
+            </div>
+        
+            {/* Updated container to apply scroll only to the markers list */}
+            <div className="flex-1 flex flex-col space-y-2 pr-1 bg-black/20 rounded max-h-[70vh] overflow-y-auto">
+              {filteredMarkers.length > 0 ? (
+                filteredMarkers.map((marker, i) => {
+                  const [iconUrl] = markerIconAndColorByType(marker.description.markerType);
+        
+                  return (
+                    <div
+                      key={i}
+                      className="group flex items-center space-x-3 p-2 rounded bg-black/10 text-white hover:bg-black/20 transition"
+                    >
+                      <button
+                        className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                        onClick={() => {
+                          mapApiRef.current?.translateToCenter(
+                            marker.position.lon / 1e6,
+                            marker.position.lat / 1e6
+                          );
+                        }}
+                      >
+                        <img src={iconUrl} alt="icon" className="w-4 h-4" />
+                      </button>
+        
+                      <span className="flex-1 text-sm truncate">
+                        {marker.description.name || '(Unnamed)'}
+                      </span>
+        
+                      <button
+                        className="text-xs px-2 py-1 bg-white/10 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
+                        onClick={() => {
+                          setIsNewMarker(false);
+                          setInitialMarker(marker);
+                          setMode(PanelMode.EditingMarker);
+                        }}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="flex-grow flex items-center justify-center text-gray-500">
+                  No markers found.
                 </div>
-              )
-            })}
+              )}
+            </div>
           </div>
-        </div>
-      )
+        );
   }
 }
