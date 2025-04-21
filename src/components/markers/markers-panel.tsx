@@ -6,7 +6,7 @@ import { AnchorProvider } from '@coral-xyz/anchor'
 
 import MarkerEditor from './marker-editor'
 import type { MapViewApi } from '../map/map-view'
-import { upsertMarker as saveMarker, getMarkersByAuthor, Marker, deleteMarker } from '@/lib/markers'
+import { upsertMarker as saveMarker, getMarkersByAuthor, Marker, deleteMarker, likeMarker } from '@/lib/markers'
 import { markerIconAndColorByType } from '@/components/map/map-markers'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
 
@@ -40,6 +40,7 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
         markerType: { basic: {} },
       },
       position: { lat: Math.round(lat * 1e6), lon: Math.round(lon * 1e6) },
+      likes: 0,
     }
 
     setIsNewMarker(true)
@@ -93,6 +94,17 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
     }
   }
 
+  const likeMarkerImpl = async (marker: Marker) => {
+    try {
+      await likeMarker(provider, marker)
+      toast.success('Marker liked')
+      loadMyMarkers() // Refresh the markers to update the like count
+    } catch (err) {
+      toast.error('Failed to like marker')
+      console.error('Failed to like marker:', err)
+    }
+  }
+
   const loadMyMarkers = useCallback(async () => {
     const pubkey = provider.wallet.publicKey
     if (!pubkey) return // not connected
@@ -119,6 +131,7 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
           onCancel={exitCreateMode}
           onSave={saveMarkerImpl}
           onDelete={deleteMarkerImpl}
+          onLike={likeMarkerImpl}
         />
       )
 
@@ -163,6 +176,27 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
                   <span className="flex-1 text-sm truncate">
                     {marker.description.name || '(Unnamed)'}
                   </span>
+
+                  {/* Heart button with like count */}
+                  <div className="flex items-center space-x-1">
+                    <button
+                      className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition"
+                      onClick={async () => {
+                        try {
+                          await likeMarker(provider, marker) // Call the likeMarker function
+                          toast.success('Liked the marker!')
+                          console.log(marker.likes)
+                          loadMyMarkers() // Refresh the markers to update the like count
+                        } catch (err) {
+                          toast.error('Failed to like marker')
+                          console.error('Failed to like marker:', err)
+                        }
+                      }}
+                    >
+                      ❤️
+                    </button>
+                    <span className="text-xs">{marker.likes || 0}</span>
+                  </div>
 
                   <button
                     className="text-xs px-2 py-1 bg-white/10 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"

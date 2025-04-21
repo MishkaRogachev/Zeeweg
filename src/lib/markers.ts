@@ -6,6 +6,7 @@ import { PublicKey } from '@solana/web3.js'
 export interface Marker {
   description: zeeweg.MarkerDescription
   position: zeeweg.Position
+  likes: number // Add the likes property
 }
 
 export async function upsertMarker(provider: AnchorProvider, marker: Marker, isNew: boolean): Promise<string> {
@@ -104,6 +105,7 @@ export async function getMarkersByTiles(provider: AnchorProvider, tiles: { x: nu
     .map((entry) => ({
       description: entry.description,
       position: entry.position,
+      likes: entry.likes.toNumber(),
     }))
 }
 
@@ -129,6 +131,7 @@ export async function getMarkersByAuthor(provider: AnchorProvider, pubkey: Publi
     .map((entry) => ({
       description: entry.description,
       position: entry.position,
+      likes: entry.likes.toNumber(),
     }))
 }
 
@@ -145,5 +148,37 @@ export async function getMarkerByLonLat(provider: AnchorProvider, lon: number, l
   return {
     description: markerAccount.description as zeeweg.MarkerDescription,
     position: markerAccount.position as zeeweg.Position,
+    likes: markerAccount.likes.toNumber(),
   }
+}
+
+
+export async function likeMarker(provider: AnchorProvider, marker: Marker): Promise<string> {
+  const program = zeeweg.getZeewegProgram(provider)
+
+  // Step 1: Get PDAs for the marker entry and tile
+  const entryPda = zeeweg.getMarkerEntryPda(program, marker.position)
+
+  const tileX = Math.floor(marker.position.lat / zeeweg.MARKER_TILE_RESOLUTION)
+  const tileY = Math.floor(marker.position.lon / zeeweg.MARKER_TILE_RESOLUTION)
+  const tilePda = zeeweg.getMarkerTilePda(program, tileX, tileY)
+
+  // Step 2: Delete the marker
+  const sig = await program.methods
+    .likeMarker()
+    .accounts({
+      author: provider.wallet.publicKey,
+      markerEntry: entryPda,
+    })
+    .rpc()
+
+  // Step 3: Confirm the transaction
+  const latestBlockHash = await provider.connection.getLatestBlockhash();
+  await provider.connection.confirmTransaction({
+    blockhash: latestBlockHash.blockhash,
+    lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+    signature: sig,
+  });
+
+  return sig
 }
