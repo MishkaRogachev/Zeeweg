@@ -13,6 +13,7 @@ pub struct Position {
 ///
 /// For example, given:
 ///   lat = 43160889 (43.160889°)
+/// 
 ///   lon = -2934364 (-2.934364°)
 /// and resolution = 100_000,
 /// the resulting tile will be:
@@ -54,6 +55,7 @@ pub struct MarkerEntry {
     pub position: Position,
     pub created_at: i64,
     pub updated_at: i64,
+    pub likes: u64, // New field to track likes
 }
 
 /// MarkerTile is a PDA that stores mapping tile -> markers.
@@ -89,7 +91,8 @@ macro_rules! marker_entry_space {
         std::mem::size_of::<MarkerType>() +     // marker_type
         std::mem::size_of::<Position>() +       // position
         8 +                                     // created_at: i64
-        8                                       // updated_at: i64
+         8 +                                    // updated_at: i64
+        8                                       // likes: u64
     };
 }
 

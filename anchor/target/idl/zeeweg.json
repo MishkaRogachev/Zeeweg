@@ -1,5 +1,5 @@
 {
-  "address": "HGY1cAiRYbgAcCFpSU9cYw21wpj9gVgWERpo8RRTeZdu",
+  "address": "DtL8RoDsCpygfSLP9TojPBGPArxgRtQ7HLe2SCV3CDtn",
   "metadata": {
     "name": "zeeweg",
     "version": "0.1.0",
@@ -277,6 +277,31 @@
       ]
     },
     {
+      "name": "like_marker",
+      "discriminator": [
+        60,
+        159,
+        176,
+        137,
+        65,
+        28,
+        65,
+        125
+      ],
+      "accounts": [
+        {
+          "name": "author",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "marker_entry",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "update_marker",
       "discriminator": [
         166,
@@ -487,6 +512,10 @@
           {
             "name": "updated_at",
             "type": "i64"
+          },
+          {
+            "name": "likes",
+            "type": "u64"
           }
         ]
       }
@@ -576,6 +605,7 @@
         "",
         "For example, given:",
         "lat = 43160889 (43.160889°)",
+        "",
         "lon = -2934364 (-2.934364°)",
         "and resolution = 100_000,",
         "the resulting tile will be:",
