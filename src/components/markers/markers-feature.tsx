@@ -97,18 +97,27 @@ export default function MarkersFeature() {
   }
 
   return (
-    <div className="flex w-screen h-full">
-      <div className="w-64 shadow-md z-10 p-4">
-        <InstrumentPanel mapApiRef={mapApiRef} provider={provider} onMarkerUpdated={onMarkerUpdated} onMarkerDeleted={onMarkerDeleted}/>
+    <div className="flex w-screen max-h-[85vh]">
+      <div className="flex-none w-100% " />
+        {/* Markers Panel */}
+        <div className="w-64 shadow-md z-10 p-4 overflow-y-auto">
+          <InstrumentPanel
+            mapApiRef={mapApiRef}
+            provider={provider}
+            onMarkerUpdated={onMarkerUpdated}
+            onMarkerDeleted={onMarkerDeleted}
+          />
+        </div>
+    
+        {/* Map View */}
+        <div className="flex-grow overflow-hidden " >
+          <MapView
+            apiRef={mapApiRef}
+            center={center}
+            zoom={zoom}
+            onViewportChanged={onViewportChanged}
+          />
+        </div>
       </div>
-      <div className="flex-grow">
-        <MapView
-          apiRef={mapApiRef}
-          center={center}
-          zoom={zoom}
-          onViewportChanged={onViewportChanged}
-        />
-      </div>
-    </div>
   )
 }
