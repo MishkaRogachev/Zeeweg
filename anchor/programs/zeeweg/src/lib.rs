@@ -5,7 +5,7 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-declare_id!("HGY1cAiRYbgAcCFpSU9cYw21wpj9gVgWERpo8RRTeZdu");
+declare_id!("DtL8RoDsCpygfSLP9TojPBGPArxgRtQ7HLe2SCV3CDtn");
 
 use instructions::*;
 
@@ -31,5 +31,9 @@ pub mod zeeweg {
 
     pub fn delete_marker(ctx: Context<DeleteMarker>, position: state::Position) -> Result<()> {
         instructions::delete_marker(ctx, position)
+    }
+
+    pub fn like_marker(ctx: Context<LikeMarker>) -> Result<()> {
+        instructions::like_marker(ctx)
     }
 }

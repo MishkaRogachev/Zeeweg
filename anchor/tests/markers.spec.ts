@@ -181,6 +181,31 @@ describe('markers', () => {
     expect(stillExists).not.toBeNull()
   })
 
+  it("Bob likes Alice's marker", async () => {
+    const sig = await program.methods
+      .likeMarker()
+      .accounts({
+        author: bob,
+        markerEntry: aliceEntryPda,
+      })
+      .signers([bobKeypair])
+      .rpc();
+    const marker = await program.account.markerEntry.fetch(aliceEntryPda);
+    expect(marker.likes.toNumber()).toBe(1);
+  });
+
+  it("Alice likes her own marker", async () => {
+    const sig = await program.methods
+      .likeMarker()
+      .accounts({
+        author: alice,
+        markerEntry: aliceEntryPda,
+      })
+      .rpc();
+    const marker = await program.account.markerEntry.fetch(aliceEntryPda);
+    expect(marker.likes.toNumber()).toBe(2);
+  });
+
   it('Alice deletes her own marker', async () => {
     const sig = await program.methods
       .deleteMarker(positionAlice)
@@ -224,4 +249,6 @@ describe('markers', () => {
     const authorAccount = await program.account.markerAuthor.fetch(bobAuthorPda)
     expect(authorAccount.markers).not.toContainEqual(bobEntryPda)
   })
+
+  
 })
