@@ -38,7 +38,7 @@ export function UiLayout({ children, links }: { children: ReactNode; links: { la
       <ClusterChecker>
         <AccountChecker />
       </ClusterChecker>
-      <div className="flex-grow mx-4 lg:mx-auto">
+      <div className="flex-grow overflow-hidden mx-4 lg:mx-auto">
         <Suspense
           fallback={
             <div className="text-center my-32">
