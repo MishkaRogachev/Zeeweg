@@ -98,7 +98,7 @@ export default function MarkersFeature() {
 
   return (
     <div className="flex w-screen h-full">
-      <div className="w-64 shadow-md z-10 p-4">
+      <div className="w-64 h-full flex-col shadow-md z-10 p-4">
         <InstrumentPanel mapApiRef={mapApiRef} provider={provider} onMarkerUpdated={onMarkerUpdated} onMarkerDeleted={onMarkerDeleted}/>
       </div>
       <div className="flex-grow">
