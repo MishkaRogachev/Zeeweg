@@ -8,7 +8,7 @@ import MarkerEditor from './marker-editor'
 import type { MapViewApi } from '../map/map-view'
 import { upsertMarker as saveMarker, getMarkersByAuthor, Marker, deleteMarker, likeMarker } from '@/lib/markers'
 import { markerIconAndColorByType } from '@/components/map/map-markers'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
+import { IconEdit, IconTrash, IconThumbUp, IconThumbDown } from '@tabler/icons-react'
 
 type Props = {
   mapApiRef: React.MutableRefObject<MapViewApi | null>
@@ -41,6 +41,7 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
       },
       position: { lat: Math.round(lat * 1e6), lon: Math.round(lon * 1e6) },
       likes: 0,
+      author: provider.wallet.publicKey,
     }
 
     setIsNewMarker(true)
@@ -148,80 +149,78 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
             Add New
           </button>
 
-          <h2 className="text-lg font-semibold">My markers</h2>
-
           <div className="overflow-y-auto flex-1 space-y-2 pr-1 bg-black/20">
-            {createdMarkers.map((marker, i) => {
-              const [iconUrl, color] = markerIconAndColorByType(marker.description.markerType)
+          {createdMarkers.map((marker, i) => {
+            const [iconUrl, color] = markerIconAndColorByType(marker.description.markerType)
+            const isOwner = marker.author?.toBase58() === provider.wallet.publicKey?.toBase58()
 
-              return (
-                <div
-                  key={i}
-                  className="group flex items-center space-x-3 p-2 rounded bg-black/10 text-white hover:bg-black/20 transition"
-                >
-                  <button
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
-                    style={{backgroundColor: color}}
-                    onClick={() => {
-                      mapApiRef.current?.translateToCenter(
-                        marker.position.lon / 1e6,
-                        marker.position.lat / 1e6
-                      )
-                    }}
+            return (
+              <div
+                key={i}
+                className="group space-y-1 p-2 rounded bg-black/10 text-white hover:bg-black/20 transition"
+              >
+                {/* Header Row */}
+                <div className="flex items-center space-x-2">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: color }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={iconUrl} alt="icon" className="w-4 h-4"/>
-                  </button>
+                    <img src={iconUrl} alt="icon" className="w-4 h-4" />
+                  </div>
 
-                  <span className="flex-1 text-sm truncate">
+                  <span className="text-sm font-semibold flex-1 truncate">
                     {marker.description.name || '(Unnamed)'}
                   </span>
 
-                  {/* Heart button with like count */}
-                  <div className="flex items-center space-x-1">
-                    <button
-                      className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition"
-                      onClick={async () => {
-                        try {
-                          await likeMarker(provider, marker) // Call the likeMarker function
-                          toast.success('Liked the marker!')
-                          console.log(marker.likes)
-                          loadMyMarkers() // Refresh the markers to update the like count
-                        } catch (err) {
-                          toast.error('Failed to like marker')
-                          console.error('Failed to like marker:', err)
-                        }
-                      }}
-                    >
-                      ❤️
-                    </button>
-                    <span className="text-xs">{marker.likes || 0}</span>
-                  </div>
+                  {isOwner && <span className="text-xs text-white/50">🛡️ owned</span>}
+                </div>
 
+                {/* Description */}
+                <p className="text-xs text-white/70 line-clamp-2">{marker.description.details}</p>
+
+                {/* Action Row */}
+                <div className="flex items-center space-x-2 text-white/80 text-sm mt-1">
                   <button
-                    className="text-xs px-2 py-1 bg-white/10 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
-                    onClick={() => {
-                      setIsNewMarker(false)
-                      setInitialMarker(marker)
-                      setMode(PanelMode.EditingMarker)
-                    }}
+                    className="hover:text-white transition flex items-center space-x-1"
+                    onClick={() => likeMarkerImpl(marker)}
                   >
-                    <IconEdit size={16} />
+                    <IconThumbUp size={14} />
+                    <span>{marker.likes}</span>
+                  </button>
+                  <button className="hover:text-white transition flex items-center space-x-1">
+                    <IconThumbDown size={14} />
+                    {/* TODO: dislikes */}
+                    <span>0</span>
                   </button>
 
-                  <button
-                    className="text-xs px-2 py-1 bg-red-500 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
-                    onClick={() => {
-                      deleteMarkerImpl(marker)
-                    }}
-                  >
-                    <IconTrash size={16} />
-                  </button>
-                  </div>
-              )
-            })}
-          </div>
+                  {isOwner && (
+                    <>
+                      <button
+                        className="hover:text-white transition flex items-center space-x-1 ml-auto"
+                        onClick={() => {
+                          setIsNewMarker(false)
+                          setInitialMarker(marker)
+                          setMode(PanelMode.EditingMarker)
+                        }}
+                      >
+                        <IconEdit size={14} />
+                      </button>
+
+                      <button
+                        className="hover:text-white transition flex items-center space-x-1"
+                        onClick={() => deleteMarkerImpl(marker)}
+                      >
+                        <IconTrash size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
-      )
+      </div>
+    )
   }
 }

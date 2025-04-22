@@ -96,18 +96,6 @@ export default function MarkersFeature() {
     api.removeSign(id)
   }
 
-  const likeMarker = async (markerPda: PublicKey) => {
-    try {
-      await program.methods
-        .likeMarker()
-        .accounts({ markerEntry: markerPda, author: wallet.publicKey })
-        .rpc();
-        console.warn('Marker liked!');
-    } catch (err) {
-      console.error('Failed to like marker: ' + err);
-    }
-  };
-
   return (
     <div className="flex w-screen h-full">
       <div className="w-64 shadow-md z-10 p-4">

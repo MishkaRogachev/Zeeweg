@@ -7,6 +7,7 @@ export interface Marker {
   description: zeeweg.MarkerDescription
   position: zeeweg.Position
   likes: number // Add the likes property
+  author: PublicKey
 }
 
 export async function upsertMarker(provider: AnchorProvider, marker: Marker, isNew: boolean): Promise<string> {
@@ -106,6 +107,7 @@ export async function getMarkersByTiles(provider: AnchorProvider, tiles: { x: nu
       description: entry.description,
       position: entry.position,
       likes: entry.likes.toNumber(),
+      author: entry.author,
     }))
 }
 
@@ -132,6 +134,7 @@ export async function getMarkersByAuthor(provider: AnchorProvider, pubkey: Publi
       description: entry.description,
       position: entry.position,
       likes: entry.likes.toNumber(),
+      author: entry.author,
     }))
 }
 
@@ -149,6 +152,7 @@ export async function getMarkerByLonLat(provider: AnchorProvider, lon: number, l
     description: markerAccount.description as zeeweg.MarkerDescription,
     position: markerAccount.position as zeeweg.Position,
     likes: markerAccount.likes.toNumber(),
+    author: markerAccount.author,
   }
 }
 
@@ -156,14 +160,10 @@ export async function getMarkerByLonLat(provider: AnchorProvider, lon: number, l
 export async function likeMarker(provider: AnchorProvider, marker: Marker): Promise<string> {
   const program = zeeweg.getZeewegProgram(provider)
 
-  // Step 1: Get PDAs for the marker entry and tile
+  // Step 1: Get PDAs for the marker entry
   const entryPda = zeeweg.getMarkerEntryPda(program, marker.position)
 
-  const tileX = Math.floor(marker.position.lat / zeeweg.MARKER_TILE_RESOLUTION)
-  const tileY = Math.floor(marker.position.lon / zeeweg.MARKER_TILE_RESOLUTION)
-  const tilePda = zeeweg.getMarkerTilePda(program, tileX, tileY)
-
-  // Step 2: Delete the marker
+  // Step 2: Like the marker
   const sig = await program.methods
     .likeMarker()
     .accounts({
