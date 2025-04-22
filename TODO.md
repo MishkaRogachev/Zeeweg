@@ -30,7 +30,6 @@ This is a list of tasks for POC Demo.
   - [ ] add Filter for "only own" markers
 
 ### In Progress
-- [ ] `marker panel` Implement vertical scrolling for the panel only ✨#feature @leo  
 
 ### Completed ✓
 - [x] finalise UI for CRUD operations ✨#feature @MishkaRogachev  
@@ -38,6 +37,7 @@ This is a list of tasks for POC Demo.
   - [x] Delete  
 - [x] `marker panel` Implement `delete` action from the list ✨#feature @vanos  
 - [x] `marker editor` improve UI to distinguish between 'new marker' or 'edit' 🐞#bug  
+- [x] `marker panel` Implement vertical scrolling for the panel only ✨#feature @vanos  
 
 
 ## Solana / Middleware
