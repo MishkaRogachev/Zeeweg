@@ -16,7 +16,7 @@ export function UiLayout({ children, links }: { children: ReactNode; links: { la
   return (
     <div className="flex flex-col">
       <div className="container lg:px-0">
-        <div className="navbar bg-base-300 dark:text-neutral-content flex-col md:flex-row space-y-2 md:space-y-0">
+        <div className="navbar bg-base-300 dark:text-neutral-content w-screen flex-col md:flex-row space-y-2 md:space-y-0">
           <div className="flex-1">
             <Link className="btn btn-ghost normal-case text-xl" href="/">
               Zeeweg
@@ -40,7 +40,7 @@ export function UiLayout({ children, links }: { children: ReactNode; links: { la
           <AccountChecker />
         </ClusterChecker>
       </div>
-      <div className="flex-grow mx-4 lg:mx-auto h-screen  max-h-[88vh]">
+      <div className="flex-grow mx-4 lg:mx-auto  max-h-[80vh]">
         <Suspense
           fallback={
             <div className="text-center my-32">
