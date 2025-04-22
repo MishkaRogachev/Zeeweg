@@ -1,0 +1,17 @@
+session_name: &project_name zeeweg
+start_directory: ./
+suppress_history: false
+before_script: "just install-and-build"
+
+windows:
+- layout: main-vertical
+  options:
+    main-pane-width: 50%
+  panes:
+    # adhoc
+    - shell_command: just
+      focus: true
+    # web (dev)
+    - pnpm dev
+    # validator
+    - pnpm anchor-localnet

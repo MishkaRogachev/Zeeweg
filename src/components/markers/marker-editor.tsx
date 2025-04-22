@@ -44,7 +44,7 @@ export default function MarkerEditor({ marker, isNewMarker, onCancel, onSave, on
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">New Marker</h2>
+      <h2 className="text-lg font-semibold">{isNewMarker ? "New Marker" : "Edit Marker"}</h2>
 
       <input
         className="w-full px-4 py-2 rounded bg-black border border-white text-white"
