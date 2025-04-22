@@ -8,7 +8,7 @@ import MarkerEditor from './marker-editor'
 import type { MapViewApi } from '../map/map-view'
 import { upsertMarker as saveMarker, getMarkersByAuthor, Marker, deleteMarker, likeMarker } from '@/lib/markers'
 import { markerIconAndColorByType } from '@/components/map/map-markers'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
+import { IconEdit, IconThumbUp, IconTrash } from '@tabler/icons-react'
 
 type Props = {
   mapApiRef: React.MutableRefObject<MapViewApi | null>
@@ -21,6 +21,8 @@ enum PanelMode {
   ObserveMarkers,
   EditingMarker,
 }
+
+const iconSize = 16;
 
 export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, onMarkerDeleted }: Props) {
   const [mode, setMode] = useState<PanelMode>(PanelMode.ObserveMarkers)
@@ -157,10 +159,10 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
               return (
                 <div
                   key={i}
-                  className="group flex items-center space-x-3 p-2 rounded bg-black/10 text-white hover:bg-black/20 transition"
+                  className="group flex items-center space-x-1 p-2 rounded bg-black/10 text-white hover:bg-black/20 transition"
                 >
                   <button
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                    className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center"
                     style={{backgroundColor: color}}
                     onClick={() => {
                       mapApiRef.current?.translateToCenter(
@@ -170,17 +172,37 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
                     }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={iconUrl} alt="icon" className="w-4 h-4"/>
+                    <img src={iconUrl} alt="icon" className="w-5 h-5"/>
                   </button>
 
                   <span className="flex-1 text-sm truncate">
                     {marker.description.name || '(Unnamed)'}
                   </span>
 
+                  <button
+                    className="text-xs px-1 py-1 bg-white/10 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
+                    onClick={() => {
+                      setIsNewMarker(false)
+                      setInitialMarker(marker)
+                      setMode(PanelMode.EditingMarker)
+                    }}
+                  >
+                    <IconEdit size={iconSize} />
+                  </button>
+
+                  <button
+                    className="text-xs px-1 py-1 bg-red-500 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
+                    onClick={() => {
+                      deleteMarkerImpl(marker)
+                    }}
+                  >
+                    <IconTrash size={iconSize} />
+                  </button>
+
                   {/* Heart button with like count */}
                   <div className="flex items-center space-x-1">
                     <button
-                      className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 rounded transition"
+                      className="text-xs px-2 py-1 rounded transition"
                       onClick={async () => {
                         try {
                           await likeMarker(provider, marker) // Call the likeMarker function
@@ -193,31 +215,16 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
                         }
                       }}
                     >
-                      ❤️
+                      <div className="badge badge-lg bg-grey-200">
+                        <IconThumbUp size={iconSize} />
+                        <span className="text-xs">{marker.likes || 0}</span>
+                      </div>
                     </button>
-                    <span className="text-xs">{marker.likes || 0}</span>
+              
                   </div>
 
-                  <button
-                    className="text-xs px-2 py-1 bg-white/10 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
-                    onClick={() => {
-                      setIsNewMarker(false)
-                      setInitialMarker(marker)
-                      setMode(PanelMode.EditingMarker)
-                    }}
-                  >
-                    <IconEdit size={16} />
-                  </button>
 
-                  <button
-                    className="text-xs px-2 py-1 bg-red-500 hover:bg-white/20 rounded opacity-0 group-hover:opacity-100 transition"
-                    onClick={() => {
-                      deleteMarkerImpl(marker)
-                    }}
-                  >
-                    <IconTrash size={16} />
-                  </button>
-                  </div>
+                </div>
               )
             })}
           </div>
