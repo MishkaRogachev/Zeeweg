@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import * as zeeweg from '@project/anchor'
 import { Marker } from '@/lib/markers'
 
-const markerTypeNames = [
+export const markerTypeNames = [
   'basic',
   'park',
   'beach',

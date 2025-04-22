@@ -1,10 +1,9 @@
-'use client'
 
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { AnchorProvider } from '@coral-xyz/anchor'
 
-import MarkerEditor from './marker-editor'
+import MarkerEditor, { markerTypeNames } from './marker-editor' // Import markerTypeNames
 import type { MapViewApi } from '../map/map-view'
 import { upsertMarker as saveMarker, getMarkersByAuthor, Marker, deleteMarker } from '@/lib/markers'
 import { markerIconAndColorByType } from '@/components/map/map-markers'
@@ -123,23 +122,49 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
       )
 
     case PanelMode.ObserveMarkers:
-    default:
-      return (
-        <div className="flex flex-col h-full space-y-4">
-          <h2 className="text-lg font-semibold">Markers:</h2>
 
-          <button
+      default:
+        const [filterType, setFilterType] = useState<string | null>(null)
+      
+        const filteredMarkers = filterType
+        ? createdMarkers.filter((marker) => {
+            const markerTypeKey = Object.keys(marker.description.markerType)[0]; // Extract the key from markerType
+            return markerTypeKey === filterType;
+          })
+        : createdMarkers;
+      
+        return (
+          <div className="flex flex-col space-y-4 h-full">
+            <div className="py-4">
+              <h2 className="text-lg font-semibold">Markers   {filterType}</h2>
+            
+              <button
             className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700 transition"
             onClick={enterCreateMode}
           >
             Add New
           </button>
-
-          <h2 className="text-lg font-semibold">My markers</h2>
-
-          <div className="overflow-y-auto flex-1 space-y-2 pr-1 bg-black/20">
-            {createdMarkers.map((marker, i) => {
-              const [iconUrl, color] = markerIconAndColorByType(marker.description.markerType)
+          <h2 className="text-lg font-semibold py-2">Filter by Type</h2>
+              <select
+                className="w-full px-2 py-2 rounded bg-white text-black"
+                value={filterType || ''}
+                onChange={(e) => setFilterType(e.target.value || null)}
+              >
+                <option value="">All</option>
+                {markerTypeNames.map((type) => (
+                  <option key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </select>
+        
+              <h2 className="text-lg font-semibold pt-2">Created markers</h2>
+            </div>
+        
+          <div className="flex-1 flex flex-col space-y-2 pr-1 bg-black/20 rounded max-h-[70vh] overflow-y-auto">
+              {filteredMarkers.length > 0 ? (
+                filteredMarkers.map((marker, i) => {
+                  const [iconUrl, color] = markerIconAndColorByType(marker.description.markerType);
 
               return (
                 <div
@@ -185,9 +210,15 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
                   </button>
                   </div>
               )
-            })}
-          </div>
+            })
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500">No markers found</p>
+            </div>
+          )}
         </div>
-      )
+      </div>
+    )
+
   }
 }
