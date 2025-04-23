@@ -10,7 +10,7 @@ Built as part of the [Encode x Solana Rust Bootcamp Q1 2025](https://www.encode.
 Zeeweg is Solana dApp there users can add, edit, and vote on geolocated markers — such as parks, historical sites, hazards and etc. — with all metadata stored **fully on-chain** using the Anchor framework.
 Think open-source Google Maps where contributions are verifiable, decentralized, and censorship-resistant.
 
-<img width="1285" alt="Screenshot 2025-04-20 at 13 37 45" src="https://github.com/user-attachments/assets/53fbb73a-9671-41e2-8119-f8feb9f311e1" />
+<img width="1287" alt="Screenshot 2025-04-23 at 17 47 42" src="https://github.com/user-attachments/assets/cfa3e150-f044-4a57-930d-c7d8d1ad95ac" />
 
 
 ## Getting Started
