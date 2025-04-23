@@ -33,7 +33,11 @@ pub mod zeeweg {
         instructions::delete_marker(ctx, position)
     }
 
-    pub fn like_marker(ctx: Context<LikeMarker>) -> Result<()> {
-        instructions::like_marker(ctx)
+    pub fn vote_marker(ctx: Context<VoteMarker>, vote: state::VoteValue) -> Result<()> {
+        instructions::vote_marker(ctx, vote)
+    }
+
+    pub fn unvote_marker(ctx: Context<UnvoteMarker>) -> Result<()> {
+        instructions::unvote_marker(ctx)
     }
 }

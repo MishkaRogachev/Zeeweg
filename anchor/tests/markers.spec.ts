@@ -25,8 +25,10 @@ describe('markers', () => {
   const tilePda = zeeweg.getMarkerTilePda(program, tileX, tileY)
   const aliceEntryPda = zeeweg.getMarkerEntryPda(program, positionAlice)
   const aliceAuthorPda = zeeweg.getMarkerAuthorPda(program, alice)
+  const aliceVotesPda = zeeweg.getMarkerVotesPda(program, aliceEntryPda)
   const bobEntryPda = zeeweg.getMarkerEntryPda(program, positionBob)
   const bobAuthorPda = zeeweg.getMarkerAuthorPda(program, bob)
+  const bobVotesPda = zeeweg.getMarkerVotesPda(program, bobEntryPda)
 
   const description: zeeweg.MarkerDescription = {
     name: 'Pinxo Restaurant',
@@ -42,6 +44,7 @@ describe('markers', () => {
         markerEntry: aliceEntryPda,
         markerTile: tilePda,
         markerAuthor: aliceAuthorPda,
+        markerVotes: aliceVotesPda,
       } as any)
       .rpc()
     helpers.confirmTransactionWithLatestBlockhash(provider.connection, sig)
@@ -71,6 +74,8 @@ describe('markers', () => {
         author: alice,
         markerEntry: aliceEntryPda,
         markerTile: tilePda,
+        markerAuthor: aliceAuthorPda,
+        markerVotes: aliceVotesPda,
       } as any)
       .rpc()
 
@@ -181,31 +186,6 @@ describe('markers', () => {
     expect(stillExists).not.toBeNull()
   })
 
-  it("Bob likes Alice's marker", async () => {
-    const sig = await program.methods
-      .likeMarker()
-      .accounts({
-        author: bob,
-        markerEntry: aliceEntryPda,
-      })
-      .signers([bobKeypair])
-      .rpc();
-    const marker = await program.account.markerEntry.fetch(aliceEntryPda);
-    expect(marker.likes.toNumber()).toBe(1);
-  });
-
-  it("Alice likes her own marker", async () => {
-    const sig = await program.methods
-      .likeMarker()
-      .accounts({
-        author: alice,
-        markerEntry: aliceEntryPda,
-      })
-      .rpc();
-    const marker = await program.account.markerEntry.fetch(aliceEntryPda);
-    expect(marker.likes.toNumber()).toBe(2);
-  });
-
   it('Alice deletes her own marker', async () => {
     const sig = await program.methods
       .deleteMarker(positionAlice)
@@ -249,6 +229,4 @@ describe('markers', () => {
     const authorAccount = await program.account.markerAuthor.fetch(bobAuthorPda)
     expect(authorAccount.markers).not.toContainEqual(bobEntryPda)
   })
-
-  
 })

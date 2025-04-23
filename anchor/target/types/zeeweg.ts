@@ -127,6 +127,34 @@ export type Zeeweg = {
           }
         },
         {
+          "name": "markerVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "markerEntry"
+              }
+            ]
+          }
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
@@ -267,6 +295,34 @@ export type Zeeweg = {
           }
         },
         {
+          "name": "markerVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "markerEntry"
+              }
+            ]
+          }
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
@@ -283,26 +339,57 @@ export type Zeeweg = {
       ]
     },
     {
-      "name": "likeMarker",
+      "name": "unvoteMarker",
       "discriminator": [
-        60,
-        159,
-        176,
-        137,
-        65,
-        28,
-        65,
-        125
+        192,
+        247,
+        238,
+        129,
+        37,
+        23,
+        207,
+        175
       ],
       "accounts": [
         {
-          "name": "author",
+          "name": "voter",
           "writable": true,
           "signer": true
         },
         {
-          "name": "markerEntry",
-          "writable": true
+          "name": "markerEntry"
+        },
+        {
+          "name": "markerVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "markerEntry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -384,6 +471,71 @@ export type Zeeweg = {
           }
         }
       ]
+    },
+    {
+      "name": "voteMarker",
+      "discriminator": [
+        147,
+        153,
+        217,
+        142,
+        206,
+        27,
+        105,
+        39
+      ],
+      "accounts": [
+        {
+          "name": "voter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "markerEntry"
+        },
+        {
+          "name": "markerVotes",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  114,
+                  95,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "markerEntry"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vote",
+          "type": {
+            "defined": {
+              "name": "voteValue"
+            }
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -425,20 +577,39 @@ export type Zeeweg = {
         156,
         193
       ]
+    },
+    {
+      "name": "markerVotes",
+      "discriminator": [
+        138,
+        32,
+        123,
+        101,
+        200,
+        120,
+        235,
+        180
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "chunkFull",
-      "msg": "This tile chunk is full"
+      "name": "alreadyVoted",
+      "msg": "Already voted"
+    },
+    {
+      "code": 6001,
+      "name": "noExistingVote",
+      "msg": "No existing vote"
     }
   ],
   "types": [
     {
       "name": "markerAuthor",
       "docs": [
-        "MarkerAuthor is a PDA that stores mapping author -> markers."
+        "MarkerAuthor is a PDA that stores mapping author -> markers.",
+        "PDA: [b\"marker_author\", author_pubkey]"
       ],
       "type": {
         "kind": "struct",
@@ -518,10 +689,6 @@ export type Zeeweg = {
           {
             "name": "updatedAt",
             "type": "i64"
-          },
-          {
-            "name": "likes",
-            "type": "u64"
           }
         ]
       }
@@ -529,7 +696,8 @@ export type Zeeweg = {
     {
       "name": "markerTile",
       "docs": [
-        "MarkerTile is a PDA that stores mapping tile -> markers."
+        "MarkerTile is a PDA that stores mapping tile -> markers.",
+        "PDA: [b\"marker_tile\", tile.x.to_le_bytes(), tile.y.to_le_bytes()]"
       ],
       "type": {
         "kind": "struct",
@@ -584,6 +752,51 @@ export type Zeeweg = {
       }
     },
     {
+      "name": "markerVote",
+      "docs": [
+        "MarkerVote struct represents a vote cast by a user on a marker."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "voter",
+            "type": "pubkey"
+          },
+          {
+            "name": "value",
+            "type": {
+              "defined": {
+                "name": "voteValue"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "markerVotes",
+      "docs": [
+        "MarkerVotes is a PDA that stores votes for markers",
+        "PDA: [b\"marker_vote\", marker_pubkey]"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "votes",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "markerVote"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "position",
       "docs": [
         "Position represents a geographical point in WGS84 coordinate system",
@@ -630,6 +843,23 @@ export type Zeeweg = {
           {
             "name": "y",
             "type": "i32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "voteValue",
+      "docs": [
+        "VoteValue is the type of vote: upvote or downvote."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "upvote"
+          },
+          {
+            "name": "downvote"
           }
         ]
       }
