@@ -118,6 +118,13 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
     }
   }, [provider])
   
+  const centerMarker = async (marker: Marker) => {
+    mapApiRef.current?.translateToCenter(
+      marker.position.lon / 1e6,
+      marker.position.lat / 1e6
+    )
+  }
+
   useEffect(() => {
     loadMyMarkers()
   }, [loadMyMarkers])
@@ -161,13 +168,14 @@ export default function InstrumentPanel({ mapApiRef, provider, onMarkerUpdated, 
               >
                 {/* Header Row */}
                 <div className="flex items-center space-x-2">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                  <button
+                    className="w-8 h-8 rounded flex items-center justify-center shrink-0"
                     style={{ backgroundColor: color }}
+                    onClick={() => centerMarker(marker)}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={iconUrl} alt="icon" className="w-4 h-4" />
-                  </div>
+                  </button>
 
                   <span className="text-sm font-semibold flex-1 truncate">
                     {marker.description.name || '(Unnamed)'}
