@@ -45,6 +45,15 @@ pub struct AddMarker<'info> {
     )]
     pub marker_author: Account<'info, MarkerAuthor>,
 
+    #[account(
+        init_if_needed,
+        payer = author,
+        space = crate::marker_votes_space!(0),
+        seeds = [b"marker_vote", marker_entry.key().as_ref()],
+        bump
+    )]
+    pub marker_votes: Account<'info, MarkerVotes>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -62,7 +71,6 @@ pub fn add_marker(
     marker_entry.author = ctx.accounts.author.key();
     marker_entry.description = description;
     marker_entry.position = position;
-    marker_entry.likes = 0;
     marker_entry.created_at = now;
     marker_entry.updated_at = now;
 

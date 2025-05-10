@@ -39,6 +39,14 @@ pub struct DeleteMarker<'info> {
     )]
     pub marker_author: Account<'info, MarkerAuthor>,
 
+    #[account(
+        mut,
+        seeds = [b"marker_vote", marker_entry.key().as_ref()],
+        bump,
+        close = author
+    )]
+    pub marker_votes: Account<'info, MarkerVotes>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -55,6 +63,6 @@ pub fn delete_marker(ctx: Context<DeleteMarker>, _position: Position) -> Result<
 
     // NOTE: don't close empty marker_tile and marker_author accounts for now
 
-    // marker_entry is closed automatically by #[account(close = author)]
+    // marker_entry and marker_votes are closed automatically by #[account(close = author)]
     Ok(())
 }

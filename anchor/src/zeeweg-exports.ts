@@ -20,7 +20,7 @@ export function getZeewegProgram(provider: AnchorProvider) {
 // Tile resolution is the size of the tile in microdegrees
 export const MARKER_TILE_RESOLUTION = 100_000
 
-// This marker type enumeration, should match MarkerType from state.rs
+// This is marker type enumeration, should match MarkerType from state.rs
 export type MarkerType =
   | { basic: {} }
   | { park: {} }
@@ -43,6 +43,19 @@ export interface MarkerDescription {
   markerType: MarkerType
 }
 
+// This is vote value enumeration, should match VoteValue from state.rs
+export enum VoteValue {
+  Upvote = 'upvote',
+  Downvote = 'downvote',
+}
+
+
+// This is the marker vote type, should match MarkerVote from state.rs
+export interface MarkerVote {
+  voter: PublicKey
+  value: VoteValue
+}
+
 // This is the marker entry type, should match MarkerEntry from state.rs
 export interface MarkerEntry {
   author: PublicKey
@@ -50,7 +63,6 @@ export interface MarkerEntry {
   position: Position
   createdAt: BN
   updatedAt: BN
-  likes: BN
 }
 
 // MarkerEntry PDA depends on the position (lat, lon)
@@ -87,4 +99,13 @@ export function getMarkerAuthorPda(program: Program<Zeeweg>, author: PublicKey):
     program.programId
   )
   return authorPda
+}
+
+// MarkerVote PDA depends on the marker entry PDA
+export function getMarkerVotesPda(program: Program<Zeeweg>, markerEntryPda: PublicKey): PublicKey {
+  const [votePda] = PublicKey.findProgramAddressSync(
+    [Buffer.from('marker_votes'), markerEntryPda.toBuffer()],
+    program.programId
+  )
+  return votePda
 }

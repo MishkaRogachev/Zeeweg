@@ -13,7 +13,7 @@ pub struct Position {
 ///
 /// For example, given:
 ///   lat = 43160889 (43.160889°)
-/// 
+///
 ///   lon = -2934364 (-2.934364°)
 /// and resolution = 100_000,
 /// the resulting tile will be:
@@ -47,6 +47,20 @@ pub struct MarkerDescription {
     pub marker_type: MarkerType,
 }
 
+/// VoteValue is the type of vote: upvote or downvote.
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
+pub enum VoteValue {
+    Upvote,
+    Downvote,
+}
+
+/// MarkerVote struct represents a vote cast by a user on a marker.
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
+pub struct MarkerVote {
+    pub voter: Pubkey,
+    pub value: VoteValue,
+}
+
 /// MarkerEntry is a PDA that stores the marker's author, metadata, position on the map and timestamps.
 #[account]
 pub struct MarkerEntry {
@@ -55,10 +69,10 @@ pub struct MarkerEntry {
     pub position: Position,
     pub created_at: i64,
     pub updated_at: i64,
-    pub likes: u64, // New field to track likes
 }
 
 /// MarkerTile is a PDA that stores mapping tile -> markers.
+/// PDA: [b"marker_tile", tile.x.to_le_bytes(), tile.y.to_le_bytes()]
 #[account]
 pub struct MarkerTile {
     pub tile: Tile,
@@ -66,10 +80,18 @@ pub struct MarkerTile {
 }
 
 /// MarkerAuthor is a PDA that stores mapping author -> markers.
+/// PDA: [b"marker_author", author_pubkey]
 #[account]
 pub struct MarkerAuthor {
     pub author: Pubkey,
     pub markers: Vec<Pubkey>, // PDAs of marker entries in this tile
+}
+
+/// MarkerVotes is a PDA that stores votes for markers
+/// PDA: [b"marker_vote", marker_pubkey]
+#[account]
+pub struct MarkerVotes {
+    pub votes: Vec<MarkerVote>,
 }
 
 impl Position {
@@ -84,15 +106,14 @@ impl Position {
 #[macro_export]
 macro_rules! marker_entry_space {
     ($description:expr) => {
-        8 +                                     // discriminator
-        32 +                                    // author: Pubkey
-        4 + $description.name.len() +           // name
-        4 + $description.details.len() +        // details
-        std::mem::size_of::<MarkerType>() +     // marker_type
-        std::mem::size_of::<Position>() +       // position
-        8 +                                     // created_at: i64
-         8 +                                    // updated_at: i64
-        8                                       // likes: u64
+        8 +                                                     // discriminator
+        32 +                                                    // author: Pubkey
+        4 + $description.name.len() +                           // name
+        4 + $description.details.len() +                        // details
+        std::mem::size_of::<MarkerType>() +                     // marker_type
+        std::mem::size_of::<Position>() +                       // position
+        8 +                                                     // created_at: i64
+        8                                                       // updated_at: i64
     };
 }
 
@@ -111,5 +132,13 @@ macro_rules! marker_author_space {
         8 +                                     // discriminator
         32 +                                    // author: Pubkey
         4 + ($max_markers * 32)                 // Vec<Pubkey>: 4-byte length + 32 bytes per pubkey
+    };
+}
+
+#[macro_export]
+macro_rules! marker_votes_space {
+    ($votes_count:expr) => {
+        8 +                                                     // discriminator
+        4 + (std::mem::size_of::<MarkerVote>() * $votes_count)   // Vec<MarkerVote>: 4-byte length + votes
     };
 }
